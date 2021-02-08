@@ -312,6 +312,7 @@ func Provider() *schema.Provider {
 			"aws_network_interfaces":                         dataSourceAwsNetworkInterfaces(),
 			"aws_organizations_organization":                 dataSourceAwsOrganizationsOrganization(),
 			"aws_organizations_organizational_units":         dataSourceAwsOrganizationsOrganizationalUnits(),
+			"aws_organizations_accounts":                     dataSourceAwsOrganizationsAccounts(),
 			"aws_outposts_outpost":                           dataSourceAwsOutpostsOutpost(),
 			"aws_outposts_outpost_instance_type":             dataSourceAwsOutpostsOutpostInstanceType(),
 			"aws_outposts_outpost_instance_types":            dataSourceAwsOutpostsOutpostInstanceTypes(),
