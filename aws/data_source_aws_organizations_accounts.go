@@ -91,7 +91,7 @@ func dataSourceAwsOrganzationAccountsRead(d *schema.ResourceData, meta interface
 			"name":            aws.StringValue(outputAccount.Name),
 			"status":          aws.StringValue(outputAccount.Status),
 		})
-		if err := d.Set("tags", tagsOutput.IgnoreAws().IgnoreConfig(ignoreTagsConfig).Map()); err != nil {
+		if err := accounts.Set("tags", tagsOutput.IgnoreAws().IgnoreConfig(ignoreTagsConfig).Map()); err != nil {
 			return fmt.Errorf("error setting tags: %s", err)
 		}
 	}
