@@ -36,7 +36,7 @@ func dataSourceAwsOrganizationsAccounts() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"joinedMethod": {
+						"joinedmethod": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
