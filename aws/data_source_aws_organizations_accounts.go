@@ -82,6 +82,8 @@ func dataSourceAwsOrganzationAccountsRead(d *schema.ResourceData, meta interface
 			return fmt.Errorf("error listing tags for Account (%s): %s", *outputAccount.Id, err)
 		}
 
+		tags := tagsOutput.IgnoreAws().IgnoreConfig(ignoreTagsConfig).Map()
+
 		accounts = append(accounts, map[string]interface{}{
 			"arn":             aws.StringValue(outputAccount.Arn),
 			"id":              aws.StringValue(outputAccount.Id),
@@ -90,10 +92,8 @@ func dataSourceAwsOrganzationAccountsRead(d *schema.ResourceData, meta interface
 			"joinedtimestamp": aws.TimeValue(outputAccount.JoinedTimestamp).Format(time.RFC3339),
 			"name":            aws.StringValue(outputAccount.Name),
 			"status":          aws.StringValue(outputAccount.Status),
+			"tags":            tags,
 		})
-		if err := accounts.Set("tags", tagsOutput.IgnoreAws().IgnoreConfig(ignoreTagsConfig).Map()); err != nil {
-			return fmt.Errorf("error setting tags: %s", err)
-		}
 	}
 
 	if err := d.Set("accounts", accounts); err != nil {
