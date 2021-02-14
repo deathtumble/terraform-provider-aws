@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/organizations"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/terraform-providers/terraform-provider-aws/aws/internal/keyvaluetags"
 )
 
 func dataSourceAwsOrganizationsOrganization() *schema.Resource {
@@ -38,6 +39,7 @@ func dataSourceAwsOrganizationsOrganization() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"tags": tagsSchema(),
 					},
 				},
 			},
@@ -98,6 +100,7 @@ func dataSourceAwsOrganizationsOrganization() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"tags": tagsSchema(),
 					},
 				},
 			},
@@ -205,7 +208,19 @@ func dataSourceAwsOrganizationsOrganizationRead(d *schema.ResourceData, meta int
 			}
 		}
 
-		if err := d.Set("accounts", flattenOrganizationsAccounts(accounts)); err != nil {
+		flattenedAccounts := flattenOrganizationsAccounts(accounts)
+		for _, flattenedAccount := range flattenedAccounts {
+			tagsOutput, err := keyvaluetags.OrganizationsListTags(conn, flattenedAccount["id"].(string))
+
+			if err != nil {
+				return fmt.Errorf("error listing tags for Account (%s): %s", flattenedAccount["id"], err)
+			}
+
+			tags := tagsOutput.IgnoreAws().Map()
+			flattenedAccount["tags"] = tags
+		}
+
+		if err := d.Set("accounts", flattenedAccounts); err != nil {
 			return fmt.Errorf("error setting accounts: %s", err)
 		}
 
