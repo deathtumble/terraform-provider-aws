@@ -2,7 +2,6 @@ package aws
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/organizations"
@@ -24,27 +23,19 @@ func dataSourceAwsOrganizationsAccounts() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"email": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"status": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"email": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"joinedmethod": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"joinedtimestamp": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"status": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -60,11 +51,9 @@ func dataSourceAwsOrganzationAccountsRead(d *schema.ResourceData, meta interface
 	conn := meta.(*AWSClient).organizationsconn
 	ignoreTagsConfig := meta.(*AWSClient).IgnoreTagsConfig
 
-	accountsInput := &organizations.ListAccountsInput{}
-
 	var outputAccounts []*organizations.Account
 
-	conn.ListAccountsPages(accountsInput, func(page *organizations.ListAccountsOutput, lastPage bool) bool {
+	conn.ListAccountsPages(&organizations.ListAccountsInput{}, func(page *organizations.ListAccountsOutput, lastPage bool) bool {
 		if page == nil {
 			return !lastPage
 		}
@@ -85,19 +74,17 @@ func dataSourceAwsOrganzationAccountsRead(d *schema.ResourceData, meta interface
 		tags := tagsOutput.IgnoreAws().IgnoreConfig(ignoreTagsConfig).Map()
 
 		accounts = append(accounts, map[string]interface{}{
-			"arn":             aws.StringValue(outputAccount.Arn),
-			"id":              aws.StringValue(outputAccount.Id),
-			"email":           aws.StringValue(outputAccount.Email),
-			"joinedmethod":    aws.StringValue(outputAccount.JoinedMethod),
-			"joinedtimestamp": aws.TimeValue(outputAccount.JoinedTimestamp).Format(time.RFC3339),
-			"name":            aws.StringValue(outputAccount.Name),
-			"status":          aws.StringValue(outputAccount.Status),
-			"tags":            tags,
+			"arn":    aws.StringValue(outputAccount.Arn),
+			"email":  aws.StringValue(outputAccount.Email),
+			"id":     aws.StringValue(outputAccount.Id),
+			"name":   aws.StringValue(outputAccount.Name),
+			"status": aws.StringValue(outputAccount.Status),
+			"tags":   tags,
 		})
 	}
 
 	if err := d.Set("accounts", accounts); err != nil {
-		return fmt.Errorf("error setting ids: %w", err)
+		return fmt.Errorf("error setting accounts: %w", err)
 	}
 
 	return nil
